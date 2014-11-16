@@ -40,9 +40,9 @@ int init_resources(void)
 	const char *fs_source =
 		"#version 120           \n"
 		"void main(void) {        "
-		"  gl_FragColor[0] = 0.0; "
+		"  gl_FragColor[0] = 1.0; "
 		"  gl_FragColor[1] = 0.0; "
-		"  gl_FragColor[2] = 1.0; "
+		"  gl_FragColor[2] = 0.0; "
 		"}";
 	glShaderSource(fs, 1, &fs_source, NULL);
 	glCompileShader(fs);
@@ -82,9 +82,9 @@ void onDisplay()
 	glUseProgram(program);
 	glEnableVertexAttribArray(attribute_coord2d);
 	GLfloat triangle_vertices[] = {
-		0.0, 0.8,
+		-0.8, 0.8,
 		-0.8, -0.8,
-		0.8, -0.8,
+		0.0, -0.8,
 	};
 	/* Describe our vertices array to OpenGL (it can't guess its format automatically) */
 	glVertexAttribPointer(
@@ -94,6 +94,22 @@ void onDisplay()
 		GL_FALSE,          // take our values as-is
 		0,                 // no extra data between each position
 		triangle_vertices  // pointer to the C array
+		);
+
+	glDrawArrays(GL_TRIANGLES, 0, 3);
+	GLfloat triangle_vertices2[] = {
+		-0.8, 0.8,
+		0.0, 0.8,
+		0.0, -0.8,
+	};
+	/* Describe our vertices array to OpenGL (it can't guess its format automatically) */
+	glVertexAttribPointer(
+		attribute_coord2d, // attribute
+		2,                 // number of elements per vertex, here (x,y)
+		GL_FLOAT,          // the type of each element
+		GL_FALSE,          // take our values as-is
+		0,                 // no extra data between each position
+		triangle_vertices2  // pointer to the C array
 		);
 
 	/* Push each element in buffer_vertices to the vertex shader */
