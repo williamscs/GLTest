@@ -1,22 +1,29 @@
-/* Using the standard output for fprintf */
 #include "stdafx.h"
 #include <stdio.h>
 #include <stdlib.h>
-/* Use glew.h instead of gl.h to get all the GL prototypes declared */
-#include <GL/glew.h>
-/* Using the GLUT library for the base windowing setup */
-#include <GL/freeglut.h>
-
+#include <GL/glew.h>		/* Use glew.h instead of gl.h to get all the GL prototypes declared */
+#include <GL/freeglut.h>	/* Using the GLUT library for the base windowing setup */
 #include "shader_utils.h"
-/* GLOBAL VARIABLES*/
+#include <glm/glm.hpp>		/* OpenGL Mathematics (header-only library) */
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
+/* GLOBAL VARIABLES */
 GLuint program;
-GLint attribute_coord2d;
-GLuint vbo_triangle;
-
-
+GLuint vbo_triangle, vbo_triangle_colors;
+GLint attribute_coord2d, attribute_v_color;
 
 int init_resources()
 {
+	GLfloat triangle_colors[] = {
+		1.0, 1.0, 0.0,
+		0.0, 0.0, 1.0,
+		1.0, 0.0, 0.0,
+	};
+	glGenBuffers(1, &vbo_triangle_colors);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo_triangle_colors);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(triangle_colors), triangle_colors, GL_STATIC_DRAW);
+
 	GLfloat triangle_vertices[] = {
 		0.0, 0.8,
 		-0.8, -0.8,
@@ -50,6 +57,13 @@ int init_resources()
 		return 0;
 	}
 
+	attribute_name = "v_color";
+	attribute_v_color = glGetAttribLocation(program, attribute_name);
+	if (attribute_v_color == -1) {
+		fprintf(stderr, "Could not bind attribute %s\n", attribute_name);
+		return 0;
+	}
+
 	return 1;
 }
 
@@ -75,10 +89,22 @@ void onDisplay()
 		0                  // offset of first element
 		);
 
+	glEnableVertexAttribArray(attribute_v_color);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo_triangle_colors);
+	glVertexAttribPointer(
+		attribute_v_color, // attribute
+		3,                 // number of elements per vertex, here (r,g,b)
+		GL_FLOAT,          // the type of each element
+		GL_FALSE,          // take our values as-is
+		0,                 // no extra data between each position
+		0                  // offset of first element
+		);
+
 	/* Push each element in buffer_vertices to the vertex shader */
 	glDrawArrays(GL_TRIANGLES, 0, 3);
 
 	glDisableVertexAttribArray(attribute_coord2d);
+	glDisableVertexAttribArray(attribute_v_color);
 	glutSwapBuffers();
 }
 
